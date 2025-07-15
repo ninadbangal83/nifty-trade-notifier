@@ -7,6 +7,7 @@ const connectDB = require("./config/db");
 const botRoutes = require("./routes/botRoutes");
 const scheduleAutoStartStop = require("./utils/scheduler");
 
+
 const app = express();
 
 // Middleware
@@ -27,3 +28,6 @@ const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`🚀 Backend live at http://localhost:${PORT}`);
 });
+
+require("./services/liveEngine"); // 👈 add this line to start the engine
+

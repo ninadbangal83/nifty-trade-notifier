@@ -5,18 +5,23 @@ const momentumMap = {}; // { SYMBOL: { startIndex, open, close, momentum, entryG
 
 function buildCandle(symbol, price) {
   const now = new Date();
+  const timeStr = now.toISOString(); // Full timestamp
   const minute = `${now.getHours()}:${now.getMinutes()}`; // Simulate per-minute candle
   const last = candles[symbol]?.at(-1);
 
   if (!last || last.time !== minute) {
     if (!candles[symbol]) candles[symbol] = [];
-    candles[symbol].push({
+    const newCandle = {
       time: minute,
       open: price,
       high: price,
       low: price,
       close: price,
-    });
+    };
+
+    candles[symbol].push(newCandle);
+    console.log(`🕒 [${symbol}] New 1-min candle @ ${timeStr}:`, newCandle); // ⬅️ Logging full detail
+    console.log(candles)
   } else {
     last.high = Math.max(last.high, price);
     last.low = Math.min(last.low, price);
@@ -27,6 +32,7 @@ function buildCandle(symbol, price) {
 }
 
 function strategyEngine(options) {
+  console.log(options);
   const signals = [];
 
   for (const opt of options) {
@@ -67,39 +73,50 @@ function strategyEngine(options) {
 
       const signalTime = new Date().toISOString();
 
-if (retracementPercent >= 95 && retracementPercent <= 105 && !track.exitGiven) {
-  signals.push({
-    symbol,
-    price,
-    time: signalTime,
-    type: "EXIT",
-    status: "Exit — 100% retraced",
-    retracement: retracementPercent.toFixed(1),
-  });
-  track.exitGiven = true;
-  delete momentumMap[symbol]; // clear
-} else if (retracementPercent >= 80 && retracementPercent < 95 && !track.warningGiven) {
-  signals.push({
-    symbol,
-    price,
-    time: signalTime,
-    type: "WARNING",
-    status: "Warning — 80–95% retraced",
-    retracement: retracementPercent.toFixed(1),
-  });
-  track.warningGiven = true;
-} else if (retracementPercent >= 60 && retracementPercent < 80 && !track.entryGiven) {
-  signals.push({
-    symbol,
-    price,
-    time: signalTime,
-    type: "Entry",
-    status: "Entry — 60–80% retraced",
-    retracement: retracementPercent.toFixed(1),
-  });
-  track.entryGiven = true;
-}
-
+      if (
+        retracementPercent >= 95 &&
+        retracementPercent <= 105 &&
+        !track.exitGiven
+      ) {
+        signals.push({
+          symbol,
+          price,
+          time: signalTime,
+          type: "EXIT",
+          status: "Exit — 100% retraced",
+          retracement: retracementPercent.toFixed(1),
+        });
+        track.exitGiven = true;
+        delete momentumMap[symbol]; // clear
+      } else if (
+        retracementPercent >= 80 &&
+        retracementPercent < 95 &&
+        !track.warningGiven
+      ) {
+        signals.push({
+          symbol,
+          price,
+          time: signalTime,
+          type: "WARNING",
+          status: "Warning — 80–95% retraced",
+          retracement: retracementPercent.toFixed(1),
+        });
+        track.warningGiven = true;
+      } else if (
+        retracementPercent >= 60 &&
+        retracementPercent < 80 &&
+        !track.entryGiven
+      ) {
+        signals.push({
+          symbol,
+          price,
+          time: signalTime,
+          type: "Entry",
+          status: "Entry — 60–80% retraced",
+          retracement: retracementPercent.toFixed(1),
+        });
+        track.entryGiven = true;
+      }
     }
   }
 
